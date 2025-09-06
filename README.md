@@ -6,7 +6,7 @@ https://github.com/google/fonts/archive/main.zip
 ## Installation - Easy but only for Windows x64
 
 1. Install google fonts using the link above then extract it.
-2. Download the latest release from [here]().
+2. Download the latest release from [here](https://github.com/zmn-hamid/install-google-fonts/releases/latest).
 3. Copy the exe file to the extracted directory and run it. It should start installing them one by one. Wait for it, it won't tell you which files is it installing.
 
 In case you got an error, run the file with admin privileges (Run As Administrator on Windows)
