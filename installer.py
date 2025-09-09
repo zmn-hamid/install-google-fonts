@@ -160,7 +160,7 @@ class FontInstaller:
             # If any required module or function is not available, assume no admin rights
             return False
     
-    def __win_notify_font_change():
+    def __win_notify_font_change(self):
         """
         Broadcasts a WM_FONTCHANGE message to all top-level windows to notify
         them of a change in the available fonts.
