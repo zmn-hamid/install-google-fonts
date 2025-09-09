@@ -56,12 +56,51 @@ jobs:
         run: |
           # For GUI applications, you might want to add the '--windowed' or '--noconsole' flag.
           pyinstaller --onefile --name ${{ env.EXECUTABLE_NAME }} main.py
+      
+      - name: '➕ Add execute permission'
+        if: runner.os != 'Windows'
+        run: chmod +x dist/${{ env.EXECUTABLE_NAME }}
 
       - name: "📤 Upload artifact"
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ASSET_NAME }}
           path: dist/${{ env.ASSET_NAME }}
+  
+  # This job runs after the 'build' job to test the executables.
+  test:
+    name: '🧪 Test on ${{ matrix.os }}'
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, windows-latest, macos-latest]
+
+    steps:
+    # Determine the name of the artifact to download.
+    - name: '🏷️ Set executable name'
+      id: set-names
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          echo "ASSET_NAME=install-all-google-fonts-windows.exe" >> $GITHUB_ENV
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+          echo "ASSET_NAME=install-all-google-fonts-macos" >> $GITHUB_ENV
+        else
+          echo "ASSET_NAME=install-all-google-fonts-linux" >> $GITHUB_ENV
+        fi
+      shell: bash
+
+    # Download the correct artifact for the current OS.
+    - name: '📥 Download artifact'
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.ASSET_NAME }}
+
+    # Run the executable to ensure it doesn't crash immediately.
+    # For a more thorough test, you could add arguments like --help or --version
+    # if your application supports them.
+    - name: '🚦 Run executable test'
+      run: ./${{ env.ASSET_NAME }}
 
   # This job runs after all 'build' jobs have successfully completed.
   upload-assets:
