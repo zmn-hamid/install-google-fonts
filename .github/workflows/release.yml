@@ -1,0 +1,98 @@
+# This is a GitHub Action workflow that automates building and releasing
+# single-file Python executables for Windows, macOS, and Linux.
+
+name: "📦 Build and Release Executables"
+
+# This workflow is triggered whenever a new release is created on GitHub.
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    # The name of the job displayed on GitHub. It's dynamic based on the OS.
+    name: "🔨 Build on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: "📂 Check out repository"
+        uses: actions/checkout@v4
+
+      - name: "🐍 Set up Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: "🧩 Install dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          # Installs dependencies from requirements.txt if it exists.
+          # It's good practice to list your project's dependencies in this file.
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+        shell: bash
+
+      - name: "🏷️ Set executable name and extension"
+        id: set-names
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            echo "EXECUTABLE_NAME=install-all-google-fonts-windows" >> $GITHUB_ENV
+            echo "ASSET_NAME=install-all-google-fonts-windows.exe" >> $GITHUB_ENV
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            echo "EXECUTABLE_NAME=install-all-google-fonts-macos" >> $GITHUB_ENV
+            echo "ASSET_NAME=install-all-google-fonts-macos" >> $GITHUB_ENV
+          else
+            echo "EXECUTABLE_NAME=install-all-google-fonts-linux" >> $GITHUB_ENV
+            echo "ASSET_NAME=install-all-google-fonts-linux" >> $GITHUB_ENV
+          fi
+        shell: bash
+
+      - name: "⚙️ Build executable with PyInstaller"
+        run: |
+          # For GUI applications, you might want to add the '--windowed' or '--noconsole' flag.
+          pyinstaller --onefile --name ${{ env.EXECUTABLE_NAME }} main.py
+
+      - name: "📤 Upload artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ASSET_NAME }}
+          path: dist/${{ env.ASSET_NAME }}
+
+  # This job runs after all 'build' jobs have successfully completed.
+  upload-assets:
+    name: "🚀 Upload Assets to Release"
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "📥 Download all artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: "📄 List downloaded files"
+        run: ls -R artifacts
+
+      - name: "🎉 Upload assets to release"
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/install-all-google-fonts-linux/install-all-google-fonts-linux
+            artifacts/install-all-google-fonts-windows.exe/install-all-google-fonts-windows.exe
+            artifacts/install-all-google-fonts-macos/install-all-google-fonts-macos
+          # This section appends a dynamic list of download links to your release notes.
+          body: |
+            ---
+            ### ⬇️ Download Links
+            * 🐧 **Linux**: [install-all-google-fonts-linux](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/install-all-google-fonts-linux)
+            * 🪟 **Windows**: [install-all-google-fonts-windows.exe](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/install-all-google-fonts-windows.exe)
+            * 🍎 **macOS**: [install-all-google-fonts-macos](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/install-all-google-fonts-macos)
+        env:
+          # The GITHUB_TOKEN is a special secret provided by GitHub Actions.
+          # It's needed to authorize the upload to your release.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
