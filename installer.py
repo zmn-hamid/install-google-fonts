@@ -189,7 +189,7 @@ class FontInstaller:
             wintypes.UINT,       # uTimeout
             ctypes.POINTER(ctypes.c_size_t) # lpdwResult
         ]
-        send_message_timeout.restype = wintypes.LRESULT
+        send_message_timeout.restype = wintypes.LPARAM
 
         # This variable will receive the result of the broadcast.
         # Using c_size_t makes it compatible with both 32-bit (DWORD) and 
