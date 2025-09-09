@@ -95,6 +95,10 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: ${{ env.ASSET_NAME }}
+    
+    - name: '➕ Add execute permission'
+      if: runner.os != 'Windows'
+      run: chmod +x ./${{ env.ASSET_NAME }}
 
     # Run the executable to ensure it doesn't crash immediately.
     # For a more thorough test, you could add arguments like --help or --version
