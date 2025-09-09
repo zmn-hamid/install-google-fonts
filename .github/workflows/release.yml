@@ -103,8 +103,14 @@ jobs:
     # Run the executable to ensure it doesn't crash immediately.
     # For a more thorough test, you could add arguments like --help or --version
     # if your application supports them.
-    - name: '🚦 Run executable test'
-      run: ./${{ env.ASSET_NAME }}
+    - name: '🚦 Run executable test with elevated privileges'
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          ./${{ env.ASSET_NAME }}
+        else
+          sudo ./${{ env.ASSET_NAME }}
+        fi
+      shell: bash
 
   # This job runs after all 'build' jobs have successfully completed.
   upload-assets:
