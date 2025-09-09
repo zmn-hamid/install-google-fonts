@@ -111,7 +111,7 @@ class FontInstaller:
         font_files = self.__find_all_fonts(root_dir)
         if not font_files:
             logger.error("No font files found in the current directory.")
-            input("Press any key to exit...")
+            self.__press_to_exit()
             exit(0)
 
         logger.info(f"Found {len(font_files)} font files to install in {root_dir}.")
@@ -125,11 +125,12 @@ class FontInstaller:
             self.__linux_install(font_files)
         else:
             logger.error(f"Unsupported operating system: {system}")
-            input("Press any key to exit...")
+            self.__press_to_exit()
             exit(1)
 
         logger.info("Installation complete. Note: Some fonts may have duplicate names; check for conflicts.\n\n")
-        input("Press any key to exit...")
+        self.__press_to_exit()
+        exit(0)
     
     def __is_sudo(self) -> bool:
         """
@@ -208,3 +209,9 @@ class FontInstaller:
             1000,               
             ctypes.byref(result)
         )
+    
+    def __press_to_exit(self):
+        try:
+            input("Press any key to exit...")
+        except EOFError:
+            logger.info("Running in a non-interactive environment. Exiting...")
