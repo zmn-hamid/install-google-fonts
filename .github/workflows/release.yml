@@ -96,6 +96,10 @@ jobs:
       with:
         name: ${{ env.ASSET_NAME }}
     
+    - name: '📥 Download sample font for testing'
+      run: curl -L -o "TestFont.ttf" "https://github.com/google/fonts/raw/refs/heads/main/ofl/poppins/Poppins-Black.ttf"
+      shell: bash
+    
     - name: '➕ Add execute permission'
       if: runner.os != 'Windows'
       run: chmod +x ./${{ env.ASSET_NAME }}
