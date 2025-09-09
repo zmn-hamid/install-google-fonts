@@ -46,20 +46,7 @@ class FontInstaller:
         
         if added:
             # Notify running programs of font change
-            HWND_BROADCAST = 0xFFFF
-            WM_FONTCHANGE = 0x001D
-            SMTO_ABORTIFHUNG = 0x0002
-            result = ctypes.c_ulong()
-            user32 = ctypes.WinDLL("user32")
-            user32.SendMessageTimeoutW(
-                HWND_BROADCAST,
-                WM_FONTCHANGE,
-                0,
-                0,
-                SMTO_ABORTIFHUNG,
-                1000,
-                ctypes.byref(result),
-            )
+            self.__win_notify_font_change()
             
             logger.info("Fonts installed and system notified on Windows.")
     
