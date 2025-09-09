@@ -112,7 +112,7 @@ class FontInstaller:
         if not font_files:
             logger.error("No font files found in the current directory.")
             self.__press_to_exit()
-            exit(0)
+            sys.exit(0)
 
         logger.info(f"Found {len(font_files)} font files to install in {root_dir}.")
 
@@ -126,11 +126,11 @@ class FontInstaller:
         else:
             logger.error(f"Unsupported operating system: {system}")
             self.__press_to_exit()
-            exit(1)
+            sys.exit(1)
 
         logger.info("Installation complete. Note: Some fonts may have duplicate names; check for conflicts.\n\n")
         self.__press_to_exit()
-        exit(0)
+        sys.exit(0)
     
     def __is_sudo(self) -> bool:
         """
