@@ -1,6 +1,7 @@
 import os
 import shutil
 import ctypes
+from ctypes import wintypes
 import subprocess
 import platform
 import sys
@@ -48,7 +49,7 @@ class FontInstaller:
             HWND_BROADCAST = 0xFFFF
             WM_FONTCHANGE = 0x001D
             SMTO_ABORTIFHUNG = 0x0002
-            result = ctypes.wintypes.DWORD()
+            result = ctypes.c_ulong()
             user32 = ctypes.WinDLL("user32")
             user32.SendMessageTimeoutW(
                 HWND_BROADCAST,
@@ -171,3 +172,52 @@ class FontInstaller:
         except (AttributeError, ImportError):
             # If any required module or function is not available, assume no admin rights
             return False
+    
+    def __win_notify_font_change():
+        """
+        Broadcasts a WM_FONTCHANGE message to all top-level windows to notify
+        them of a change in the available fonts.
+        
+        This is the modern, 64-bit compatible way to perform this action.
+        """
+        # Define Windows constants
+        HWND_BROADCAST = 0xFFFF
+        WM_FONTCHANGE = 0x001D
+        SMTO_ABORTIFHUNG = 0x0002
+        
+        # Load the user32 library
+        user32 = ctypes.WinDLL("user32")
+        
+        # Define the function signature for SendMessageTimeoutW for type safety.
+        # This prevents potential crashes and ensures correct data types are used,
+        # especially between 32-bit and 64-bit systems.
+        send_message_timeout = user32.SendMessageTimeoutW
+        send_message_timeout.argtypes = [
+            wintypes.HWND,       # hWnd
+            wintypes.UINT,       # uMsg
+            wintypes.WPARAM,     # wParam
+            wintypes.LPARAM,     # lParam
+            wintypes.UINT,       # fuFlags
+            wintypes.UINT,       # uTimeout
+            ctypes.POINTER(wintypes.DWORD_PTR) # lpdwResult
+        ]
+        send_message_timeout.restype = wintypes.LRESULT
+
+        # This variable will receive the result of the broadcast.
+        # Using c_size_t makes it compatible with both 32-bit (DWORD) and 
+        # 64-bit (DWORD_PTR) systems. The original code's use of c_ulong
+        # was only correct for 32-bit systems.
+        result = wintypes.DWORD_PTR()
+        
+        print("Broadcasting font change notification...")
+        
+        # Call the function
+        send_message_timeout(
+            HWND_BROADCAST,
+            WM_FONTCHANGE,
+            0,                 
+            0,                  
+            SMTO_ABORTIFHUNG,
+            1000,               
+            ctypes.byref(result)
+        )
