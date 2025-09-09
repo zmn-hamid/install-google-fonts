@@ -105,7 +105,7 @@ jobs:
   # This job runs after all 'build' jobs have successfully completed.
   upload-assets:
     name: "🚀 Upload Assets to Release"
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
