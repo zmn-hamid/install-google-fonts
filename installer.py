@@ -187,7 +187,7 @@ class FontInstaller:
             wintypes.LPARAM,     # lParam
             wintypes.UINT,       # fuFlags
             wintypes.UINT,       # uTimeout
-            ctypes.POINTER(wintypes.DWORD_PTR) # lpdwResult
+            ctypes.POINTER(ctypes.c_size_t) # lpdwResult
         ]
         send_message_timeout.restype = wintypes.LRESULT
 
@@ -195,7 +195,7 @@ class FontInstaller:
         # Using c_size_t makes it compatible with both 32-bit (DWORD) and 
         # 64-bit (DWORD_PTR) systems. The original code's use of c_ulong
         # was only correct for 32-bit systems.
-        result = wintypes.DWORD_PTR()
+        result = ctypes.c_size_t()
         
         print("Broadcasting font change notification...")
         
