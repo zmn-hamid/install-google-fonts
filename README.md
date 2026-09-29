@@ -1,5 +1,7 @@
 # Install All Google Fonts
 
+> **Disclaimer:** This project is AI-generated.
+
 Automatically install all google fonts downloaded using:
 https://github.com/google/fonts/archive/main.zip
 
